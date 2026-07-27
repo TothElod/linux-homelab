@@ -1,3 +1,7 @@
+networks:
+  proxy-network:
+    external: true
+
 services:
   jellyfin:
     image: jellyfin/jellyfin
@@ -28,6 +32,9 @@ services:
     # Optional - may be necessary for docker healthcheck to pass if running in host network mode
     #extra_hosts:
     #  - 'host.docker.internal:host-gateway'
+    networks:
+      - proxy-network
+
   radarr:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
@@ -41,6 +48,8 @@ services:
     ports:
       - "7878:7878"
     restart: unless-stopped
+    networks:
+      - proxy-network
 
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
@@ -54,6 +63,8 @@ services:
     ports:
       - 9696:9696
     restart: unless-stopped
+    networks:
+      - proxy-network
 
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
@@ -73,6 +84,8 @@ services:
       - 6881:6881/udp
     stop_grace_period: "10s" #optional
     restart: unless-stopped
+    networks:
+      - proxy-network
 
   homepage:
     image: ghcr.io/gethomepage/homepage:latest
@@ -83,10 +96,12 @@ services:
       - ./docker/homepage/config:/app/config # Make sure your local config directory exists
       - /var/run/docker.sock:/var/run/docker.sock:ro # (optional) For docker integrations
     environment:
-      HOMEPAGE_ALLOWED_HOSTS: ${HOMEPAGE_ALLOWED_HOSTS}:3000 # required, may need port. See gethomepage.dev/installation/#homepage_allowed_hosts
+      HOMEPAGE_ALLOWED_HOSTS: ${HOMEPAGE_ALLOWED_HOSTS} # required, may need port. See gethomepage.dev/installation/#homepage_allowed_hosts
       PUID: 1000
       PGID: 1000
     restart: unless-stopped
+    networks:
+      - proxy-network
 
   sonarr:
     image: lscr.io/linuxserver/sonarr:latest
@@ -102,6 +117,8 @@ services:
     ports:
       - 8989:8989
     restart: unless-stopped
+    networks:
+      - proxy-network
 
   vikunja:
     image: vikunja/vikunja
@@ -122,6 +139,8 @@ services:
       db:
         condition: service_healthy
     restart: unless-stopped
+    networks:
+      - proxy-network
   db:
     image: postgres:17
     environment:
@@ -135,6 +154,8 @@ services:
       test: ["CMD-SHELL", "pg_isready -h localhost -U $$POSTGRES_USER"]
       interval: 2s
       start_period: 30s
+    networks:
+      - proxy-network
 
   lidarr:
     image: lscr.io/linuxserver/lidarr:latest
@@ -150,3 +171,77 @@ services:
     ports:
       - 8686:8686
     restart: unless-stopped
+    networks:
+      - proxy-network
+
+  caddy:
+    image: caddy
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./caddy/data:/data
+      - ./caddy/config:/config
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+    networks:
+      - proxy-network
+
+  prometheus:
+    user: "1000:1000"
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./docker/prometheus/data:/prometheus
+    restart: unless-stopped
+    networks:
+      - proxy-network
+
+  grafana:
+    user: "1000:1000"
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./docker/grafana:/var/lib/grafana
+    restart: unless-stopped
+    networks:
+      - proxy-network
+
+  node-exporter:
+    image: prom/node-exporter
+    container_name: node-exporter
+    pid: host
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+    restart: unless-stopped
+    networks:
+      - proxy-network
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - "8081:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+    restart: unless-stopped
+    networks:
+      - proxy-network
+
