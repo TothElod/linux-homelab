@@ -3,13 +3,13 @@
 ![Docker](https://img.shields.io/badge/Docker-Compose-blue)
 ![License](https://img.shields.io/badge/License-GPLv3-blue)
 
-A Docker-based homelab running on Linux, designed to provide a self-hosted media server, task management, and automation environment while serving as a learning project for Linux system administration, Docker, networking, and DevOps concepts.
+A Docker-based homelab running on Linux, designed to provide a self-hosted media server, task management, automation, monitoring, and reverse proxy services while serving as a learning project for Linux system administration, Docker, networking, DevOps, and self-hosted infrastructure.
 
 ---
 
 # Project Overview
 
-This project aims to build a complete self-hosted home server using Docker Compose on Linux. The primary goal is to gain practical experience with Linux administration, containerization, networking, automation, and service management.
+This project aims to build a complete self-hosted home server using Docker Compose on Linux. The primary goal is to gain practical experience with Linux administration, containerization, networking, reverse proxies, monitoring, automation, version control, service management and DevOps workflows.
 
 The homelab currently includes the following services:
 
@@ -21,7 +21,12 @@ The homelab currently includes the following services:
 * **Prowlarr** – Indexer management
 * **Homepage** – Dashboard for accessing all services
 * **Vikunja** – Self-hosted task management
-* **Automated backup script** – Scheduled backups using cron/dcron
+* **Caddy** - Reverse proxy with HTTPS support
+* **Prometheus** - Metrics collection
+* **Grafana** - Monitoring dashboards and alerting
+* **Node Exporter** - Linux system metrics
+* **cAdvisor** - Docker container metrics
+* **Automated backup script** – Scheduled backups using dcron
 
 
 This project is continuously evolving as new services and features are added.
@@ -31,9 +36,14 @@ This project is continuously evolving as new services and features are added.
 # Features
 
 * Docker Compose based deployment
+* Reverse proxy using Caddy
+* Local domain names for services
 * Persistent Docker volumes
 * Automated media management
 * Self-hosted dashboard
+* System monitoring
+* Docker container monitoring
+* Grafana alerting (Discord webhook)
 * Task management
 * Automatic backups
 * Easy service management
@@ -46,6 +56,11 @@ This project is continuously evolving as new services and features are added.
 * Linux
 * Docker
 * Docker Compose
+* Caddy
+* Prometheus
+* Grafana
+* Node Exporter
+* cAdvisor
 * Bash
 * YAML
 * PostgreSQL
@@ -57,23 +72,57 @@ This project is continuously evolving as new services and features are added.
 
 ```text
 .
-├── docker-compose.yml
-├── .env.example
 ├── backup.sh
-├── docker/
-│   ├── homepage/
-│   ├── jellyfin/
-│   ├── lidarr/
-│   ├── prowlarr/
-│   ├── radarr/
-│   └── sonarr/
-├── db/
-├── files/
+├── caddy
+│   ├── Caddyfile
+│   ├── config
+│   └── data
+├── db
+├── docker
+│   ├── grafana
+│   ├── homepage
+│   ├── jellyfin
+│   ├── lidarr
+│   ├── prometheus
+│   ├── prowlarr
+│   ├── radarr
+│   └── sonarr
+├── docker-compose.yml
+├── files
+├── LICENSE
 └── README.md
+
 ```
+---
+# Networking
+
+All containers communicate through a shared Docker bridge network.
+
+Caddy acts as a reverse proxy, allowing services to be accessed using friendly hostnames such as:
+
+https://jellyfin.example.com
+https://homepage.example.com
+https://grafana.example.com
+
+For local development these hostnames can be mapped using the operating system's `hosts` file.
 
 ---
+# Monitoring
 
+Monitoring is provided by Prometheus and Grafana.
+
+Collected metrics include:
+
+* CPU usage
+* Memory usage
+* Disk usage
+* Docker container statistics
+* Host uptime
+* Network traffic
+
+Grafana dashboards visualize these metrics and alert rules can send notifications through Discord webhooks when predefined conditions are met.
+
+---
 # Installation
 
 ## Prerequisites
@@ -124,21 +173,24 @@ After deployment, the services are available through their respective ports.
 | qBittorrent | 8080         |
 | Radarr      | 7878         |
 | Sonarr      | 8989         |
+| Lidarr      | 8686         |
 | Prowlarr    | 9696         |
 | Vikunja     | 3456         |
+| Grafana     | 3001         |
+| Prometheus  | 9090         |
 
 Open your browser and navigate to the desired service.
 
 Example:
 
 ```
-http://localhost:3000
+http://192.168.x.x:3000
 ```
 
 or
 
 ```
-http://<your-server-ip>:3000
+http://homepage.example.com
 ```
 
 ---
@@ -155,10 +207,12 @@ The backup process is intended to run automatically using dcron's anacron-like s
 
 Planned improvements include:
 
-* Reverse proxy
-* HTTPS support
-* Monitoring with Prometheus and Grafana
-* Automated updates
+* CI/CD with GitHub Actions
+* Automatic Docker image updates
+* WireGuard VPN
+* Centralized logging
+* Monitoring improvements
+* Additional Grafana dashboards
 * Additional self-hosted services
 
 ---
@@ -188,7 +242,7 @@ See the LICENSE file for details.
 
 # Acknowledgements
 
-Thanks to the developers and maintainers of the open-source projects used in this homelab, including Docker, Jellyfin, LinuxServer.io, Vikunja, and the broader open-source community.
+Thanks to the developers and maintainers of the open-source projects used in this homelab, including Docker, Jellyfin, LinuxServer.io, Vikunja, Grafana Labs, Prometheus, Caddy, and the broader open-source community.
 
 ---
 
@@ -204,6 +258,11 @@ This project uses several open-source applications that retain their own license
 - Prowlarr
 - Homepage
 - Vikunja
+- Caddy
+- Prometheus
+- Grafana
+- Node Exporter
+- cAdvisor
 - Docker
 
 Each project is licensed under its respective license. Please refer to the official repositories of those projects for licensing information.
