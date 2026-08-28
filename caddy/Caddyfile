@@ -31,3 +31,9 @@ http://grafana.example.com {
 http://prometheus.example.com {
     reverse_proxy prometheus:9090
 }
+http://cloud.localhost.com, http://192.168.0.41 {
+    root * /var/www/html
+    php_fastcgi nextcloud:9000
+    file_server
+}
+
