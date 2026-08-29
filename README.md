@@ -3,7 +3,7 @@
 ![Docker](https://img.shields.io/badge/Docker-Compose-blue)
 ![License](https://img.shields.io/badge/License-GPLv3-blue)
 
-A Docker-based homelab running on Linux, designed to provide a self-hosted media server, task management, automation, monitoring, and reverse proxy services while serving as a learning project for Linux system administration, Docker, networking, DevOps, and self-hosted infrastructure.
+A Docker-based homelab running on Linux, designed to provide a self-hosted media server, file synchronization, task management, automation, monitoring, and reverse proxy services while serving as a learning project for Linux system administration, Docker, networking, DevOps, and self-hosted infrastructure.
 
 ---
 
@@ -21,6 +21,7 @@ The homelab currently includes the following services:
 * **Prowlarr** – Indexer management
 * **Homepage** – Dashboard for accessing all services
 * **Vikunja** – Self-hosted task management
+* **Nextcloud** - Self-hosted file synchronization and storage
 * **Caddy** - Reverse proxy with HTTPS support
 * **Prometheus** - Metrics collection
 * **Grafana** - Monitoring dashboards and alerting
@@ -41,6 +42,7 @@ This project is continuously evolving as new services and features are added.
 * Persistent Docker volumes
 * Automated media management
 * Self-hosted dashboard
+* File synchronization and storage with Nextcloud
 * System monitoring
 * Docker container monitoring
 * Grafana alerting (Discord webhook)
@@ -57,6 +59,7 @@ This project is continuously evolving as new services and features are added.
 * Docker
 * Docker Compose
 * Caddy
+* Nextcloud
 * Prometheus
 * Grafana
 * Node Exporter
@@ -83,6 +86,7 @@ This project is continuously evolving as new services and features are added.
 │   ├── homepage
 │   ├── jellyfin
 │   ├── lidarr
+│   ├── nextcloud
 │   ├── prometheus
 │   ├── prowlarr
 │   ├── radarr
@@ -121,6 +125,25 @@ Collected metrics include:
 * Network traffic
 
 Grafana dashboards visualize these metrics and alert rules can send notifications through Discord webhooks when predefined conditions are met.
+
+Node Exporter provides Linux system metrics, while cAdvisor provides Docker container metrics.
+
+---
+# Nextcloud
+
+Nextcloud provides self-hosted file storage and synchronization within the homelab
+
+It uses PostgreSQL as its database backend and is integrated with the shared Docker network and Caddy reverse proxy.
+
+The Nextcloud instance can also be used as a WebDAV synchronization target for applications such as Joplin.
+
+Example WebDAV endpoint:
+
+```bash
+http://cloud.example.com/remote.php/dav/files/<username>/
+```
+
+For local network access, the server's LAN IP address can also be used if it is included in Nextcloud's `trusted_domains` configuration.
 
 ---
 # Installation
@@ -176,6 +199,7 @@ After deployment, the services are available through their respective ports.
 | Lidarr      | 8686         |
 | Prowlarr    | 9696         |
 | Vikunja     | 3456         |
+| Nextcloud   | 80/443 via Caddy |
 | Grafana     | 3001         |
 | Prometheus  | 9090         |
 
@@ -242,7 +266,7 @@ See the LICENSE file for details.
 
 # Acknowledgements
 
-Thanks to the developers and maintainers of the open-source projects used in this homelab, including Docker, Jellyfin, LinuxServer.io, Vikunja, Grafana Labs, Prometheus, Caddy, and the broader open-source community.
+Thanks to the developers and maintainers of the open-source projects used in this homelab, including Docker, Jellyfin, LinuxServer.io, Vikunja, Nextcloud, Grafana Labs, Prometheus, Caddy, and the broader open-source community.
 
 ---
 
@@ -258,6 +282,7 @@ This project uses several open-source applications that retain their own license
 - Prowlarr
 - Homepage
 - Vikunja
+- Nextcloud
 - Caddy
 - Prometheus
 - Grafana
