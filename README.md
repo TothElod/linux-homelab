@@ -232,7 +232,6 @@ The backup process is intended to run automatically using dcron's anacron-like s
 Planned improvements include:
 
 * CI/CD with GitHub Actions
-* Automatic Docker image updates
 * WireGuard VPN
 * Centralized logging
 * Monitoring improvements
